@@ -1,0 +1,126 @@
+# Nombre del workflow que aparecerá en la pestaña "Actions" de GitHub
+name:  BTG Fondos CI/CD
+
+# Eventos que disparan la ejecución del workflow
+on:
+
+  # Ejecuta el workflow cuando alguien hace push
+  push:
+
+    # Solo si el push ocurre en estas ramas
+    branches: [ main, develop ]
+
+  # Ejecuta el workflow cuando se abre o actualiza un Pull Request
+  pull_request:
+
+    # Solo si el Pull Request apunta a la rama main
+    branches: [ main ]
+
+
+# Definición de los trabajos (jobs) que ejecutará el workflow
+jobs:
+
+
+  # Primer job: pruebas y análisis del código
+  test:
+
+    # Nombre descriptivo del job que aparece en GitHub
+    name: Test and Analyze
+
+    # Sistema operativo de la máquina virtual que usará GitHub
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # permisos de escritura para este repositorio.
+      contents: write
+
+
+    # Lista de pasos que ejecutará este job
+    steps:
+
+      # Paso 1: descargar el repositorio dentro de la máquina virtual
+      - name: Checkout repository
+
+        # Action oficial que clona el repositorio en el runner
+        uses: actions/checkout@v4
+
+
+      # Paso 2: instalar Flutter en la máquina virtual
+      - name: Setup Flutter
+
+        # Action que instala y configura Flutter automáticamente
+        uses: subosito/flutter-action@v2
+
+        # Parámetros que recibe la action
+        with:
+
+          # Versión específica de Flutter que se instalará
+          flutter-version: '3.35.4'
+          
+
+      # Paso 3: instalar dependencias del proyecto
+      - name: Install dependencies
+
+        # Ejecuta el comando para descargar los paquetes definidos en pubspec.yaml
+        run: flutter pub get
+
+
+      # Paso 4: analizar el código Dart
+      - name: Analyze code
+
+        # Ejecuta el analyzer de Flutter para detectar errores o malas prácticas
+        run: flutter analyze
+
+
+      # Paso 5: ejecutar las pruebas unitarias
+      - name: Run tests
+
+        # Ejecuta todos los tests ubicados en la carpeta test/
+        run: flutter test
+
+
+
+    # Segundo job: construir el APK (versión corregida para FVM)
+  build:
+    name: Build APK with FVM
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Instalar FVM primero
+      - name: Install FVM
+        run: dart pub global activate fvm
+
+      # Dejar que FVM instale la versión de Flutter definida en tu proyecto
+      - name: Install Flutter via FVM
+        run: fvm install
+
+      # Usar el polling file watcher para evitar errores en CI
+      - name: Disable file watcher
+        run: echo "FLUTTER_USE_POLLING_FILE_WATCHER=true" >> $GITHUB_ENV
+
+      # De aquí en adelante, todos los comandos usan "fvm flutter"
+      - name: Flutter doctor
+        run: fvm flutter doctor -v
+
+      - name: Install dependencies
+        run: fvm flutter pub get
+
+      - name: Build APK
+        run: fvm flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-dev-release
+          path: build/app/outputs/flutter-apk/release.apk
