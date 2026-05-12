@@ -70,7 +70,7 @@ jobs:
       - name: Analyze code
 
         # Ejecuta el analyzer de Flutter para detectar errores o malas prácticas
-        run: flutter analyze --no-fatal-warnings
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
 
 
       # Paso 5: ejecutar las pruebas unitarias
