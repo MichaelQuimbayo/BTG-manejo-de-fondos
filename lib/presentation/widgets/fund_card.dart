@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/fund.dart';
 import '../../domain/entities/transaction_entity.dart';
+import '../providers/balance_provider.dart';
 import '../providers/fund_providers.dart';
 import 'subscription_form.dart';
 
@@ -16,6 +17,9 @@ class FundCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencyFormatter = NumberFormat.currency(locale: 'es_CO', symbol: '\$', decimalDigits: 0);
+    
+    // Observamos el estado del saldo para las validaciones de regla de negocio
+    final balanceAsync = ref.watch(balanceProvider);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -85,7 +89,28 @@ class FundCard extends ConsumerWidget {
                       ),
                     )
                   : ElevatedButton(
-                      onPressed: () => _showSubscriptionDialog(context, ref),
+                      onPressed: () {
+                        // REGLA DE NEGOCIO: Evaluación de saldo antes de permitir la vinculación
+                        final currentBalance = balanceAsync.value ?? 0;
+
+                        if (currentBalance <= 0) {
+                          _showAnimatedErrorModal(
+                            context,
+                            'No tienes saldo disponible para realizar vinculaciones.',
+                            'No tienes saldo',
+                            Icons.money_off_rounded,
+                          );
+                        } else if (currentBalance < fund.minimumAmount) {
+                          _showAnimatedErrorModal(
+                            context,
+                            'El saldo es insuficiente para vincularse al fondo ${fund.name}. Requiere un mínimo de ${currencyFormatter.format(fund.minimumAmount)}.',
+                            'Saldo Insuficiente',
+                            Icons.warning_amber_rounded,
+                          );
+                        } else {
+                          _showSubscriptionDialog(context, ref);
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,
@@ -101,6 +126,50 @@ class FundCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Muestra un modal animado (Zoom con elasticidad) para informar sobre reglas de negocio no cumplidas.
+  void _showAnimatedErrorModal(BuildContext context, String message, String title, IconData icon) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      transitionDuration: const Duration(milliseconds: 500),
+      pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
+      transitionBuilder: (context, anim1, anim2, child) {
+        return ScaleTransition(
+          scale: CurvedAnimation(
+            parent: anim1,
+            curve: Curves.elasticOut,
+          ),
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            icon: Icon(icon, color: Colors.orange, size: 48),
+            title: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 15),
+            ),
+            actions: [
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Entendido',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -123,7 +192,7 @@ class FundCard extends ConsumerWidget {
   }
 
   /// Ejecuta la suscripción delegando la lógica al notifier de fondos.
-  /// Maneja la respuesta visual (éxito o error) mediante SnackBars.
+  /// Maneja la respuesta visual (éxito o error) mediante SnackBars o el modal animado.
   Future<void> _subscribe(BuildContext context, WidgetRef ref, NotificationMethod method) async {
     Navigator.of(context).pop(); // Cierra el diálogo de formulario
     try {
@@ -138,11 +207,12 @@ class FundCard extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.red,
-          ),
+        // Si ocurre un error inesperado de negocio, usamos el modal animado
+        _showAnimatedErrorModal(
+          context,
+          e.toString().replaceAll('Exception: ', ''),
+          'Atención',
+          Icons.error_outline_rounded,
         );
       }
     }
