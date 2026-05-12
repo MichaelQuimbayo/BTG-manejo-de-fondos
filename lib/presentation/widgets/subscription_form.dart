@@ -4,10 +4,7 @@ import '../../domain/entities/transaction_entity.dart';
 /// Formulario interactivo para la suscripción a un fondo.
 /// Incluye validaciones de entrada y manejo de estado para el método de notificación.
 class SubscriptionForm extends StatefulWidget {
-  /// Callback que se ejecuta cuando el formulario es válido y se confirma la acción.
   final Function(NotificationMethod method, String contact) onConfirm;
-  
-  /// Monto mínimo del fondo para mostrar información contextual si fuera necesario.
   final double minimumAmount;
 
   const SubscriptionForm({
@@ -21,13 +18,8 @@ class SubscriptionForm extends StatefulWidget {
 }
 
 class _SubscriptionFormState extends State<SubscriptionForm> {
-  /// Clave global para identificar y validar el formulario.
   final _formKey = GlobalKey<FormState>();
-  
-  /// Método de notificación seleccionado por defecto.
   NotificationMethod _selectedMethod = NotificationMethod.email;
-  
-  /// Controlador para el campo de texto del contacto (email o teléfono).
   final _contactController = TextEditingController();
 
   @override
