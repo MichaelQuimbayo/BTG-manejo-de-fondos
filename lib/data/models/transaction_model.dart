@@ -3,20 +3,35 @@ import '../../domain/entities/transaction_entity.dart';
 
 part 'transaction_model.g.dart';
 
+/// Modelo de datos para la persistencia local de transacciones.
+/// Mapea la entidad [TransactionEntity] a un formato compatible con Hive.
 @HiveType(typeId: 1)
 class TransactionModel extends HiveObject {
+  /// Identificador único de la transacción.
   @HiveField(0)
   final String id;
+  
+  /// ID del fondo involucrado.
   @HiveField(1)
   final String fundId;
+  
+  /// Nombre del fondo para facilitar la visualización sin joins.
   @HiveField(2)
   final String fundName;
+  
+  /// Monto operado.
   @HiveField(3)
   final double amount;
+  
+  /// Fecha de ejecución.
   @HiveField(4)
   final DateTime date;
+  
+  /// Tipo de transacción (almacenado como String).
   @HiveField(5)
   final String type;
+  
+  /// Método de notificación seleccionado (almacenado como String).
   @HiveField(6)
   final String notificationMethod;
 
@@ -30,6 +45,7 @@ class TransactionModel extends HiveObject {
     required this.notificationMethod,
   });
 
+  /// Crea un [TransactionModel] desde la entidad de dominio.
   factory TransactionModel.fromEntity(TransactionEntity entity) {
     return TransactionModel(
       id: entity.id,
@@ -42,6 +58,7 @@ class TransactionModel extends HiveObject {
     );
   }
 
+  /// Convierte el modelo de persistencia de vuelta a la entidad de dominio.
   TransactionEntity toEntity() {
     return TransactionEntity(
       id: id,

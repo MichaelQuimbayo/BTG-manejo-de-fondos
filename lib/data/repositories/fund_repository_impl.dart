@@ -5,6 +5,8 @@ import '../datasources/local_data_source.dart';
 import '../models/fund_model.dart';
 import '../models/transaction_model.dart';
 
+/// Implementación del repositorio de fondos.
+/// Se encarga de coordinar el flujo de datos entre la fuente de datos local y el dominio.
 class FundRepositoryImpl implements IFundRepository {
   final LocalDataSource localDataSource;
 
@@ -14,7 +16,8 @@ class FundRepositoryImpl implements IFundRepository {
   Future<List<Fund>> getFunds() async {
     final models = localDataSource.getFunds();
     
-    // Si el catálogo está vacío, lo inicializamos con los datos de la prueba
+    // Inicialización del catálogo con los datos requeridos por la prueba técnica
+    // si la base de datos local está vacía.
     if (models.isEmpty) {
       final initialFunds = _getInitialFunds();
       await localDataSource.saveFunds(
@@ -52,6 +55,7 @@ class FundRepositoryImpl implements IFundRepository {
     await localDataSource.updateFundStatus(fundId, isSubscribed);
   }
 
+  /// Define la lista inicial de fondos según el documento del caso de negocio.
   List<Fund> _getInitialFunds() {
     return [
       const Fund(id: '1', name: 'FPV_BTG_PACTUAL_RECAUDADORA', minimumAmount: 75000, category: FundCategory.fpv),

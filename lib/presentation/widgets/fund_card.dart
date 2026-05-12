@@ -4,7 +4,10 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/fund.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/fund_providers.dart';
+import 'subscription_form.dart';
 
+/// Tarjeta visual que representa un fondo individual en el catálogo.
+/// Permite al usuario ver detalles básicos y realizar acciones de vinculación/desvinculación.
 class FundCard extends ConsumerWidget {
   final Fund fund;
 
@@ -57,7 +60,7 @@ class FundCard extends ConsumerWidget {
                       child: const Text('Desvincularse'),
                     )
                   : ElevatedButton(
-                      onPressed: () => _showNotificationPicker(context, ref),
+                      onPressed: () => _showSubscriptionDialog(context, ref),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,
@@ -71,33 +74,36 @@ class FundCard extends ConsumerWidget {
     );
   }
 
-  void _showNotificationPicker(BuildContext context, WidgetRef ref) {
+  /// Muestra el diálogo que contiene el formulario de suscripción y validación.
+  void _showSubscriptionDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Notificación'),
-        content: const Text('¿Cómo desea recibir la notificación de su vinculación?'),
-        actions: [
-          TextButton(
-            onPressed: () => _subscribe(context, ref, NotificationMethod.email),
-            child: const Text('Email'),
+        title: Text('Suscripción a ${fund.name}'),
+        content: SingleChildScrollView(
+          child: SubscriptionForm(
+            minimumAmount: fund.minimumAmount,
+            onConfirm: (method, contact) {
+              _subscribe(context, ref, method);
+            },
           ),
-          TextButton(
-            onPressed: () => _subscribe(context, ref, NotificationMethod.sms),
-            child: const Text('SMS'),
-          ),
-        ],
+        ),
       ),
     );
   }
 
+  /// Ejecuta la suscripción delegando la lógica al notifier de fondos.
+  /// Maneja la respuesta visual (éxito o error) mediante SnackBars.
   Future<void> _subscribe(BuildContext context, WidgetRef ref, NotificationMethod method) async {
-    Navigator.of(context).pop(); // Cierra el diálogo
+    Navigator.of(context).pop(); // Cierra el diálogo de formulario
     try {
       await ref.read(fundsProvider.notifier).subscribe(fund, method);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Suscripción exitosa a ${fund.name}')),
+          SnackBar(
+            content: Text('Suscripción exitosa a ${fund.name}'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -112,6 +118,7 @@ class FundCard extends ConsumerWidget {
     }
   }
 
+  /// Muestra un diálogo de confirmación antes de proceder con la desvinculación.
   void _showCancelConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,

@@ -4,12 +4,17 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/history_provider.dart';
 
+/// Widget que visualiza el historial de movimientos del usuario.
+/// Se muestra usualmente dentro de un ModalBottomSheet.
 class TransactionHistoryList extends ConsumerWidget {
   const TransactionHistoryList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Escucha el provider del historial
     final historyAsync = ref.watch(historyProvider);
+    
+    // Formateadores para moneda y fechas
     final currencyFormatter = NumberFormat.currency(locale: 'es_CO', symbol: '\$', decimalDigits: 0);
     final dateFormatter = DateFormat('dd/MM/yyyy HH:mm');
 
@@ -17,6 +22,7 @@ class TransactionHistoryList extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
         children: [
+          // Indicador visual de arrastre para el BottomSheet
           Container(
             width: 40,
             height: 4,
@@ -31,6 +37,7 @@ class TransactionHistoryList extends ConsumerWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
+          
           Expanded(
             child: historyAsync.when(
               data: (transactions) {
@@ -39,6 +46,7 @@ class TransactionHistoryList extends ConsumerWidget {
                     child: Text('No hay transacciones registradas todavía.'),
                   );
                 }
+                
                 return ListView.separated(
                   itemCount: transactions.length,
                   separatorBuilder: (context, index) => const Divider(),
@@ -59,12 +67,14 @@ class TransactionHistoryList extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(dateFormatter.format(tx.date)),
+                          // Requisito: Mostrar el método de notificación utilizado
                           if (tx.notificationMethod != NotificationMethod.none)
                             Text('Aviso por: ${tx.notificationMethod.name.toUpperCase()}', 
                                  style: const TextStyle(fontSize: 11)),
                         ],
                       ),
                       trailing: Text(
+                        // Muestra el monto con signo negativo para suscripciones y positivo para cancelaciones
                         '${isSubscription ? '-' : '+'}${currencyFormatter.format(tx.amount)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -76,7 +86,7 @@ class TransactionHistoryList extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(child: Text('Error: $err')),
+              error: (err, _) => Center(child: Text('Error al cargar historial: $err')),
             ),
           ),
         ],
