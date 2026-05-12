@@ -18,7 +18,7 @@ Este proyecto es una aplicación web y móvil desarrollada con Flutter que permi
 
 ## 🛠️ Stack Tecnológico
 
-- **Framework:** Flutter 3.x
+- **Framework:** Flutter 3..35.4
 - **Manejo de Estado:** [Riverpod](https://riverpod.dev/) (con generación de código).
 - **Arquitectura:** Clean Architecture (Capa de Dominio, Datos y Presentación).
 - **Base de Datos Local:** [Hive](https://pub.dev/packages/hive) (NoSQL ligera y rápida).
