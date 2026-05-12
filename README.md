@@ -2,7 +2,7 @@
 
 Este proyecto es una aplicación web y móvil desarrollada con Flutter que permite a los usuarios gestionar sus suscripciones a fondos de inversión (FPV/FIC). Ha sido diseñado siguiendo principios de **Clean Architecture** y las mejores prácticas de desarrollo en Flutter.
 
-## 🚀 Características Principales
+##  Características Principales
 
 - **Visualización de Fondos:** Catálogo dinámico con los fondos requeridos (FPV y FIC).
 - **Manejo de Saldo:** Saldo inicial de $500.000 COP con actualizaciones en tiempo real tras cada operación.
@@ -25,7 +25,7 @@ Este proyecto es una aplicación web y móvil desarrollada con Flutter que permi
 - **Test:** [Mockito]
 - **Formateo:** `intl` para monedas y fechas.
 
-## 📂 Estructura del Proyecto (Clean Architecture)
+##  Estructura del Proyecto (Clean Architecture)
 
 ```
 lib/
