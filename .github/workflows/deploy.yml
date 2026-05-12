@@ -103,7 +103,7 @@ jobs:
 
       # Dejar que FVM instale la versión de Flutter definida en tu proyecto
       - name: Install Flutter via FVM
-        run: fvm install
+        run: dart pub global activate fvm
 
       # Usar el polling file watcher para evitar errores en CI
       - name: Disable file watcher
@@ -122,5 +122,5 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-dev-release
-          path: build/app/outputs/flutter-apk/release.apk
+          name: app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
