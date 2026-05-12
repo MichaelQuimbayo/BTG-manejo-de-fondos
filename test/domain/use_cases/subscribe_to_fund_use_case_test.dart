@@ -1,9 +1,10 @@
+import 'package:bgt_manejo_de_fondos/domain/entities/fund.dart';
+import 'package:bgt_manejo_de_fondos/domain/entities/transaction_entity.dart';
+import 'package:bgt_manejo_de_fondos/domain/repositories/i_fund_repository.dart';
+import 'package:bgt_manejo_de_fondos/domain/use_cases/subscribe_to_fund_use_case.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:bgt_manejo_de_datos/domain/entities/fund.dart';
-import 'package:bgt_manejo_de_datos/domain/entities/transaction_entity.dart';
-import 'package:bgt_manejo_de_datos/domain/repositories/i_fund_repository.dart';
-import 'package:bgt_manejo_de_datos/domain/use_cases/subscribe_to_fund_use_case.dart';
+
 
 class MockFundRepository extends Mock implements IFundRepository {}
 
