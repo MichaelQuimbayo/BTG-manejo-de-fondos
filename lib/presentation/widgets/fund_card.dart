@@ -4,7 +4,10 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/fund.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../providers/fund_providers.dart';
+import 'subscription_form.dart';
 
+/// Tarjeta visual optimizada para cualquier tamaño de pantalla.
+/// Se ha rediseñado para evitar desbordamientos y adaptarse a rejillas dinámicas.
 class FundCard extends ConsumerWidget {
   final Fund fund;
 
@@ -15,54 +18,84 @@ class FundCard extends ConsumerWidget {
     final currencyFormatter = NumberFormat.currency(locale: 'es_CO', symbol: '\$', decimalDigits: 0);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.zero,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Sección superior: Nombre y Precio
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fund.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Categoría: ${fund.category.name.toUpperCase()}',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                      ),
-                    ],
+                  child: Text(
+                    fund.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   currencyFormatter.format(fund.minimumAmount),
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
-            const Divider(height: 24),
+            const SizedBox(height: 4),
+            // Categoría
+            Text(
+              'Categoría: ${fund.category.name.toUpperCase()}',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            
+            const Spacer(), // Empuja el botón hacia la parte inferior de la tarjeta
+            
+            // Botón de acción
             SizedBox(
               width: double.infinity,
+              height: 40,
               child: fund.isSubscribed
                   ? OutlinedButton(
                       onPressed: () => _showCancelConfirmation(context, ref),
-                      style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-                      child: const Text('Desvincularse'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: const Text(
+                        'Desvincularse',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     )
                   : ElevatedButton(
-                      onPressed: () => _showNotificationPicker(context, ref),
+                      onPressed: () => _showSubscriptionDialog(context, ref),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Text('Vincularse'),
+                      child: const Text(
+                        'Vincularse',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
             ),
           ],
@@ -71,33 +104,33 @@ class FundCard extends ConsumerWidget {
     );
   }
 
-  void _showNotificationPicker(BuildContext context, WidgetRef ref) {
+  void _showSubscriptionDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Notificación'),
-        content: const Text('¿Cómo desea recibir la notificación de su vinculación?'),
-        actions: [
-          TextButton(
-            onPressed: () => _subscribe(context, ref, NotificationMethod.email),
-            child: const Text('Email'),
+        title: Text('Suscripción a ${fund.name}'),
+        content: SingleChildScrollView(
+          child: SubscriptionForm(
+            minimumAmount: fund.minimumAmount,
+            onConfirm: (method, contact) {
+              _subscribe(context, ref, method);
+            },
           ),
-          TextButton(
-            onPressed: () => _subscribe(context, ref, NotificationMethod.sms),
-            child: const Text('SMS'),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Future<void> _subscribe(BuildContext context, WidgetRef ref, NotificationMethod method) async {
-    Navigator.of(context).pop(); // Cierra el diálogo
+    Navigator.of(context).pop();
     try {
       await ref.read(fundsProvider.notifier).subscribe(fund, method);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Suscripción exitosa a ${fund.name}')),
+          SnackBar(
+            content: Text('Suscripción exitosa a ${fund.name}'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
