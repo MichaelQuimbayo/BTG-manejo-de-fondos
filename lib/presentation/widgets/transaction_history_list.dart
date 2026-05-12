@@ -58,7 +58,9 @@ class TransactionHistoryList extends ConsumerWidget {
 
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: isSubscription ? Colors.blue.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                        backgroundColor: isSubscription 
+                            ? Colors.blue.withValues(alpha: 0.1) 
+                            : Colors.green.withValues(alpha: 0.1),
                         child: Icon(
                           isSubscription ? Icons.add_circle_outline : Icons.remove_circle_outline,
                           color: isSubscription ? Colors.blue : Colors.green,

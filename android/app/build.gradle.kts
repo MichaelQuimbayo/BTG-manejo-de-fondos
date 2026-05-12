@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.bgt_manejo_de_datos"
+    namespace = "com.example.bgt_manejo_de_fondos"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
