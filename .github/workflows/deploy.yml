@@ -91,23 +91,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          channel: stable
 
-      # Instalar FVM primero
-      - name: Install FVM
+      - name: Activate FVM
         run: dart pub global activate fvm
 
-      # Dejar que FVM instale la versión de Flutter definida en tu proyecto
-      - name: Install Flutter via FVM
-        run: dart pub global activate fvm
+      - name: Add pub cache to PATH
+        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
 
-      # Usar el polling file watcher para evitar errores en CI
-      - name: Disable file watcher
-        run: echo "FLUTTER_USE_POLLING_FILE_WATCHER=true" >> $GITHUB_ENV
+      - name: Verify FVM
+        run: fvm --version
 
       # De aquí en adelante, todos los comandos usan "fvm flutter"
       - name: Flutter doctor
