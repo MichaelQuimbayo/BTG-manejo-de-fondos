@@ -1,0 +1,24 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'history_provider.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+String _$historyHash() => r'25d32e98797b5791295e8e847d079633e6605a91';
+
+@ProviderFor(History)
+final historyProvider =
+    AutoDisposeAsyncNotifierProvider<History, List<TransactionEntity>>.internal(
+  History.new,
+  name: r'historyProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$historyHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$History = AutoDisposeAsyncNotifier<List<TransactionEntity>>;
+// ignore_for_file: type=lint
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
