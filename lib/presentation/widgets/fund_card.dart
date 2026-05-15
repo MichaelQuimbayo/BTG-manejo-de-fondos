@@ -16,7 +16,7 @@ class FundCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currencyFormatter = NumberFormat.currency(locale: 'es_CO', symbol: '\$', decimalDigits: 0);
+    final currencyFormatter = NumberFormat.currency(locale: 'es_CO', symbol: '', decimalDigits: 0);
     
     // Observamos el estado del saldo para las validaciones de regla de negocio
     final balanceAsync = ref.watch(balanceProvider);
@@ -48,13 +48,18 @@ class FundCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  currencyFormatter.format(fund.minimumAmount),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                    fontSize: 14,
-                  ),
+                Row(
+                  children: [
+                    Icon(Icons.attach_money_rounded, color: Colors.green, size: 16),
+                    Text(
+                      currencyFormatter.format(fund.minimumAmount),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
