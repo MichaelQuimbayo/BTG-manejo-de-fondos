@@ -17,7 +17,7 @@ class HomePage extends ConsumerWidget {
     final fundsAsync = ref.watch(fundsProvider);
     
     // Formateador de moneda para pesos colombianos
-    final currencyFormatter = NumberFormat.currency(locale: 'es_CO', symbol: '\$', decimalDigits: 0);
+    final currencyFormatter = NumberFormat.currency(locale: 'es_CO', symbol: '', decimalDigits: 0);
 
     final screenWidth = MediaQuery.of(context).size.width;
     
@@ -52,31 +52,121 @@ class HomePage extends ConsumerWidget {
                   child: Container(
                     padding: EdgeInsets.all(screenWidth > 600 ? 40.0 : 24.0),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(32),
                         bottomRight: Radius.circular(32),
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: screenWidth > 600 ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Saldo Disponible',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
+
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF0A4C8B),
+                          Color(0xFF003D71),
+                          Color(0xFF002B50),
+                        ],
+                      ),
+
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 24,
+                          spreadRadius: 2,
+                          offset: Offset(0, 10),
                         ),
-                        const SizedBox(height: 8),
-                        balanceAsync.when(
-                          data: (balance) => Text(
-                            currencyFormatter.format(balance),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: screenWidth > 600 ? 48 : 32,
-                              fontWeight: FontWeight.bold,
+                      ],
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+
+                        // Círculo derecho superior
+                        Positioned(
+                          top: -60,
+                          right: -40,
+                          child: Container(
+                            width: 220,
+                            height: 220,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white.withOpacity(0.08),
+                                  Colors.white.withOpacity(0.01),
+                                ],
+                              ),
                             ),
                           ),
-                          loading: () => const CircularProgressIndicator(color: Colors.white),
-                          error: (err, _) => Text('Error: $err', style: const TextStyle(color: Colors.redAccent)),
+                        ),
+
+                        // Círculo izquierdo inferior
+                        Positioned(
+                          bottom: -70,
+                          left: -50,
+                          child: Container(
+                            width: 180,
+                            height: 180,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.04),
+                            ),
+                          ),
+                        ),
+
+                        // Contenido principal
+                        Column(
+                          crossAxisAlignment: screenWidth > 600
+                              ? CrossAxisAlignment.center
+                              : CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Saldo Disponible',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            balanceAsync.when(
+                              data: (balance) => Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: screenWidth > 600
+                                    ? MainAxisAlignment.center
+                                    : MainAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.attach_money_rounded,
+                                    color: Colors.white,
+                                    size: screenWidth > 600 ? 52 : 36,
+                                  ),
+
+                                  Text(
+                                    currencyFormatter.format(balance),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: screenWidth > 600 ? 54 : 38,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              loading: () => const CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                              error: (err, _) => Text(
+                                'Error: $err',
+                                style: const TextStyle(
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
